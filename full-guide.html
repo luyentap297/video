@@ -1,0 +1,124 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Remix Studio — Hướng dẫn laptop</title><style>body{font:16px/1.7 system-ui;color:#1b3158;background:#f3f6fb;max-width:1000px;padding:25px;margin:auto}section{background:white;border:1px solid #dde5f0;padding:24px;border-radius:14px;margin:20px 0}h1{font-size:30px}h2{font-size:21px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.8 system-ui}a{color:#2563eb}.btn{display:inline-block;background:#2563eb;color:white;padding:10px 18px;border-radius:8px;text-decoration:none}</style><a href="index.html#pipeline">← Remix Studio</a> <a class="btn" href="remix-studio-source.zip" download>Tải bộ cài Windows</a><h1>Remix Studio — bản chạy trên laptop Windows</h1><section><h2>Bắt đầu trong 4 bước</h2><pre>1. Tải `remix-studio-source.zip`, giải nén toàn bộ vào một thư mục, ví dụ `C:\RemixStudio`. Không chạy trực tiếp bên trong ZIP.
+2. Chạy `CAI_DAT_WINDOWS.bat`. Bộ cài kiểm tra Python 3.11+, tạo `.venv`, cài thư viện và Chromium. Nếu thiếu Python, mở trang tải chính thức; cài Python rồi chạy lại bộ cài. Nếu thiếu FFmpeg, có lựa chọn cài qua winget hoặc cài theo trang chính thức. Sau khi cài FFmpeg, mở lại cửa sổ để PATH cập nhật.
+3. Chạy `KIEM_TRA_LAPTOP.bat`. FFmpeg, ffprobe và Chromium cần báo sẵn sàng cho dựng HTML. Có thể cài Piper và tải model Việt trong bộ cài; chất giọng phải nghe thử, không mặc định giọng nữ miền Nam.
+4. Chạy `KHOI_DONG.bat`. Trình duyệt mở `http://127.0.0.1:8080`. Giữ cửa sổ chương trình mở trong khi xuất video hoặc chờ lịch đăng. Đóng tab trình duyệt vẫn tiếp tục chạy; tắt chương trình, ngủ hoặc tắt laptop thì không chạy lịch.
+
+Cấu hình mặc định: CPU, 540p, 24 FPS, một tác vụ nặng chạy tại một thời điểm. Phù hợp để bắt đầu trên laptop i3/16 GB; tốc độ thực tế phụ thuộc độ dài, lớp hiệu ứng và máy. Có thể xuất 720p/1080p, đến 60 FPS trong timeline, nhưng thời gian dựng và dung lượng tăng. Không cần GPU rời cho tính năng dựng cơ bản. Không chạy ComfyUI/Wan trên cấu hình này theo mặc định.
+
+Đây là bộ mã nguồn kèm trình cài Windows, không phải tệp EXE đã đóng gói kèm sẵn Python/FFmpeg/model. Lần cài đầu cần Internet. Sau khi cài, biên tập FFmpeg và Piper hoạt động offline; AI, tìm nguồn và đăng bài cần mạng.</pre></section><section><h2>Các tệp bạn cần dùng</h2><pre>| Tệp | Công dụng |
+|---|---|
+| CAI_DAT_WINDOWS.bat | Cài bộ dựng, kiểm tra FFmpeg, lựa chọn Piper |
+| KHOI_DONG.bat | Mở web và máy chủ cục bộ |
+| KIEM_TRA_LAPTOP.bat | Kiểm tra phần mềm/model, không in API key |
+| CAU_HINH_DICH_VU.bat | Nhập khóa riêng trên laptop |
+| CAI_DAT_TAI_VIDEO.bat | Cài thêm yt-dlp và faster-whisper |
+| FULL_GUIDE.md | Hướng dẫn này |
+
+Nếu cổng 8080 đang dùng, chạy `.venv\Scripts\python.exe serve.py --port 8082` trong terminal tại thư mục ứng dụng. Truy cập URL chương trình in ra. Không mở trực tiếp `dist/index.html` bằng `file://`.</pre></section><section><h2>Biên tập timeline</h2><pre>1. Mở **Biên tập timeline**, thêm video, ảnh PNG/JPG/WebP, nhạc hoặc lời đọc. Mỗi tệp tối đa 50 MB.
+2. Track V1 là clip chính nối tiếp; kéo clip đổi thứ tự. Chọn clip để đặt điểm cắt, thời lượng sau tốc độ, tốc độ 0,5–2×, âm lượng, lấp đầy/giữ trọn hình, lật ngang, sáng/tương phản/bão hòa; bấm **Áp dụng** để lưu thuộc tính.
+3. Đặt đầu đọc bằng thanh trượt và bấm **Tách tại đầu đọc**. Tách sẽ đưa chuyển cảnh về 0 để giữ mốc tách chính xác.
+4. Track V2 chèn video/ảnh theo giờ bắt đầu, vị trí, độ rộng và độ đậm. Track này chỉ lấy hình; muốn lấy tiếng hãy thêm tư liệu vào track âm thanh.
+5. Thêm lớp chữ hoặc nhập SRT UTF-8; chỉnh thời gian, vị trí, màu và kích thước. Track âm thanh hỗ trợ nhiều clip, âm lượng và mờ âm đầu/cuối.
+6. Chọn crossfade chung giữa clip chính, khung hình, độ phân giải và FPS. Clip phải dài ít nhất gấp đôi thời gian crossfade.
+7. Bấm **Xuất MP4**. Backend chuẩn hóa media rồi dựng H.264/AAC. Tải kết quả, thêm vào kho hoặc **Đưa vào duyệt / lịch**. Bản chỉnh sửa là video mới cần được duyệt lại.
+
+Có hoàn tác/làm lại trong phiên (30 bước), phím Space phát/dừng, mũi tên di chuyển 0,1 giây. Xem trước là bản cơ bản: chuyển cảnh không mô phỏng đầy đủ, âm lượng HTML giới hạn ở 100% dù bản xuất có thể khuếch đại lên 200%. Bản xuất dùng FFmpeg. Phụ đề dùng font hệ thống, có thể khác đôi chút so với preview. Màu `brightness` của preview chỉ xấp xỉ bộ lọc FFmpeg. Chưa có tracking, mask, chroma key, keyframe chuyển động, waveform hoặc công cụ hậu kỳ tương đương Premiere/DaVinci.
+
+Timeline tối đa 30 clip/track, 300 lớp chữ và 10 phút tổng. JSON tải xuống là cấu trúc timeline, không chứa tệp tư liệu; dùng Sao lưu trong Cài đặt để mang theo media.</pre></section><section><h2>Ý tưởng → kịch bản → video → duyệt</h2><pre>- Mở **Ý tưởng &amp; lịch tự động**. Nhập ý tưởng, người xem, khung hình, thời lượng mục tiêu. Có thể nhập lời thoại sẵn rồi lưu bản nháp và bấm Dựng, không cần AI viết.
+- Để AI viết, cấu hình `GEMINI_API_KEY`, chọn model có quyền truy cập. Mặc định bộ nối dùng `gemini-2.5-flash`; nếu tài khoản/model thay đổi, nhập tên model khác trong công cụ cấu hình.
+- Bấm **AI viết &amp; dựng video** sau khi đồng ý dùng dịch vụ. HTML tạo video chữ/minh họa theo mẫu, không tự tìm ảnh; MoneyPrinterTurbo dùng dịch vụ riêng để dựng bằng tư liệu.
+- Dựng xong xem video, sửa kịch bản hoặc mở timeline. Sửa kịch bản sẽ bỏ duyệt và yêu cầu dựng lại. Thời lượng mục tiêu chỉ là ước lượng; lời đọc có thể làm cảnh dài hơn.
+- Bấm Duyệt rồi chọn lịch. Dịch vụ đăng bài phải kết nối trước. Bấm duyệt không tự đăng.
+
+Chiến dịch hỗ trợ 1–3 video/ngày vào giờ Việt Nam; mặc định chưa bật. Bật cần key và xác nhận dùng AI. Mỗi video vẫn chờ duyệt. Mỗi ngày/mỗi vị trí chiến dịch chỉ tạo một công việc kể cả sau khởi động lại. Không tạo bù những ngày máy tắt. Chiến dịch bắt đầu xử lý khi đến giờ trên ngày hiện tại, không phải giờ đăng bài.
+
+Giới hạn mặc định 5 lần gọi Gemini/ngày, có thể chỉnh `REMIX_AI_DAILY_LIMIT` (1–100). Tính cả lần lỗi đã gửi. Đây là hạn mức số lần gọi, không phải ngân sách tiền; Runway, MoneyPrinterTurbo, nguồn tìm kiếm và nhà cung cấp khác có phí/hạn mức riêng.</pre></section><section><h2>Douyin / RedNote, dịch và lồng tiếng</h2><pre>Chạy `CAI_DAT_TAI_VIDEO.bat` rồi khởi động lại. Trong **Douyin / RedNote**:
+
+- Nhập 1–10 liên kết HTTPS chính thức, xác nhận quyền sử dụng tư liệu và bấm Bắt đầu hàng đợi. Nguồn bài ảnh không được xử lý thành video trong bộ nối này.
+- Hoặc chọn video đã có trên máy. Tối đa 50 MB, 10 phút, 4K. Không xóa watermark/logo gốc.
+- Nhận dạng lời nói dùng faster-whisper CPU int8, mặc định model `base`, hai CPU threads. Lần đầu model được tải từ nguồn thư viện; có thể mất thời gian. Windows có thể cần Microsoft Visual C++ Runtime theo hướng dẫn faster-whisper.
+- Dịch phụ đề qua Gemini sang Việt, Anh, Trung, Nhật hoặc Hàn; cần đồng ý gửi lời thoại. Giữ mốc thời gian, kiểm tra lại độ chính xác trước khi dùng.
+- Lồng tiếng hiện hỗ trợ tiếng Việt bằng Piper và **thay toàn bộ âm thanh gốc**. Không tự tách/giữ nhạc nền. Lời đọc được tăng tốc tối đa 2× để khớp đoạn; nếu dài hơn giới hạn sẽ báo lỗi thay vì cắt mất nội dung.
+- Tải MP4/SRT hoặc mở trong timeline để chỉnh tiếp. Chưa có màn hình sửa từng bản dịch trước khi lồng tiếng; có thể sửa SRT trong timeline hoặc nhập âm thanh lời đọc riêng.
+
+yt-dlp có extractor cho Douyin/XiaoHongShu nhưng không bảo đảm mọi link hoạt động. Nền tảng đổi cơ chế hoặc yêu cầu đăng nhập có thể làm tải lỗi. `REMIX_YTDLP_COOKIES` cho phép trỏ đến tệp cookies Netscape do chính bạn cung cấp; ứng dụng không tự lấy cookies trình duyệt, không giải CAPTCHA hoặc truy cập bài riêng tư không có quyền. Không chia sẻ tệp cookies.
+
+Tìm kiếm từ khóa cần dịch vụ nguồn riêng; chưa có nguồn tìm kiếm Douyin/RedNote hoạt động được cấp sẵn. Nhập nhiều liên kết vẫn dùng độc lập với nguồn tìm kiếm.</pre></section><section><h2>Cấu hình dịch vụ trên máy</h2><pre>Chạy **CAU_HINH_DICH_VU.bat**. Enter giữ nguyên giá trị; `-` xóa. Khóa nhập bằng ô ẩn ký tự. Cấu hình lưu tại `config.local.json` bên ngoài thư mục web, hạn chế quyền đọc trên Windows; đây vẫn là tệp chứa bí mật, không được chia sẻ. Môi trường hệ điều hành có ưu tiên hơn tệp cấu hình. Khởi động lại chương trình sau khi sửa.
+
+Các biến chính: `GEMINI_API_KEY`, `REMIX_GEMINI_MODEL`, `REMIX_AI_DAILY_LIMIT`, `RUNWAYML_API_SECRET`, `REMIX_MPT_URL`, `REMIX_MPT_TOKEN`, `REMIX_PUBLISH_URL`, `REMIX_PUBLISH_TOKEN`, `REMIX_PUBLISH_NAME`, `REMIX_SEARCH_URL`, `REMIX_SEARCH_TOKEN`, `REMIX_YTDLP_COOKIES`.
+
+MoneyPrinterTurbo chạy riêng, dùng cổng khác 8080, ví dụ http://127.0.0.1:8081; cấu hình LLM/Pexels/TTS/font tại dịch vụ. Runway cần key/credit riêng. Chi tiết bộ nối cũ xem AUTOMATION_GUIDE.md. API key không đưa vào IndexedDB, tệp tác vụ hoặc ZIP mã nguồn.</pre></section><section><h2>Hợp đồng dịch vụ tìm kiếm</h2><pre>Bộ nối này dành cho nguồn bạn đã có quyền truy cập, không có sẵn crawler riêng. Thiết lập URL HTTPS hoặc localhost và token Bearer. Backend gửi POST JSON:
+
+```json
+{&quot;keyword&quot;:&quot;góc học tập&quot;,&quot;platform&quot;:&quot;douyin&quot;,&quot;limit&quot;:10}
+```
+
+Nguồn cần trả:
+
+```json
+{&quot;items&quot;:[{&quot;title&quot;:&quot;Tiêu đề video&quot;,&quot;url&quot;:&quot;https://www.douyin.com/video/123&quot;}]}
+```
+
+Chỉ nhận URL nền tảng chính thức. `platform` là `douyin` hoặc `rednote`. Có thể nối qua n8n với nhà cung cấp tìm kiếm của bạn.</pre></section><section><h2>Hợp đồng dịch vụ đăng bài</h2><pre>Đây là **bộ nối HTTP**, chưa phải tích hợp TikTok/YouTube/Facebook trực tiếp đã được xét duyệt. Cần một dịch vụ đăng bài hoặc workflow n8n có quyền đăng lên tài khoản đích và thực hiện hợp đồng sau. Không hứa tự đăng TikTok khi chưa có quyền nền tảng.
+
+Thiết lập `REMIX_PUBLISH_URL`, `REMIX_PUBLISH_TOKEN`, `REMIX_PUBLISH_NAME`. Khi đến giờ, backend gửi multipart POST gồm `metadata` (JSON) và `video` (MP4), Bearer token và `Idempotency-Key` = mã công việc. Dịch vụ cần lưu khóa này để **không đăng lặp** khi nhận cùng yêu cầu.
+
+```json
+{&quot;idempotency_key&quot;:&quot;32-hex-job-id&quot;,&quot;target&quot;:&quot;ma-kenh-tai-dich-vu&quot;,&quot;title&quot;:&quot;Tiêu đề&quot;,&quot;caption&quot;:&quot;Mô tả&quot;,&quot;sha256&quot;:&quot;...&quot;,&quot;scheduled_at&quot;:1790000000}
+```
+
+Nếu đăng hoàn tất, trả `{&quot;status&quot;:&quot;published&quot;,&quot;post_id&quot;:&quot;id-bai-dang&quot;,&quot;url&quot;:&quot;https://...&quot;}`. Nếu chỉ nhận hàng đợi, trả `{&quot;status&quot;:&quot;accepted&quot;,&quot;remote_id&quot;:&quot;task-123&quot;}`; backend sẽ GET `{REMIX_PUBLISH_URL}/task-123` mỗi khoảng 30 giây để lấy `processing`, `published` hoặc `failed`. HTTP 200 hoặc chữ OK đơn thuần không được coi là đã đăng. Không trả `published` trước khi nền tảng xác nhận.
+
+Chỉ video đã duyệt đúng phiên bản và SHA-256 mới lên lịch. Lịch cần chọn kênh và xác nhận gửi. Video thay đổi thì phải duyệt lại. Sau khi gửi nếu mất kết nối/không rõ kết quả, hệ thống chuyển Cần kiểm tra dịch vụ, không tự gửi lại. Khi khởi động lại, tác vụ đang gửi cũng chuyển trạng thái cần kiểm tra, giữ mã bên ngoài. Nếu máy bỏ lỡ lịch quá 2 giờ, cần chọn lại giờ đăng; trong 2 giờ hệ thống có thể gửi khi máy hoạt động lại. Hãy chọn giờ phù hợp với quy tắc của dịch vụ/nền tảng.
+
+Bản này không tự lấy phiên đăng nhập mạng xã hội hoặc bật tính năng đăng bài khi chưa cấu hình. Danh sách Kênh TikTok cũ chỉ là ghi nhận thông tin; không phải OAuth. Kế hoạch đăng cũ là kế hoạch thủ công; lịch máy chủ nằm ở Ý tưởng &amp; lịch tự động.</pre></section><section><h2>Sao lưu và cập nhật</h2><pre>- Cài đặt → Sao lưu chứa dự án browser, timeline, ý tưởng offline và media của browser. Dùng cùng trình duyệt, cùng địa chỉ/cổng để thấy dữ liệu cũ. Truy cập `localhost` và `127.0.0.1` là hai kho browser khác nhau.
+- `data/` chứa SQLite, lịch, hàng đợi, tư liệu và MP4 trên đĩa. Để sao lưu nhất quán, tắt chương trình rồi sao chép thư mục này. SQLite WAL cũng cần giữ nếu sao chép khi đang mở; ưu tiên tắt trước.
+- `voices/` chứa model Piper. `config.local.json` chứa khóa riêng; sao lưu riêng tại nơi an toàn.
+- Khi cập nhật mã nguồn: tắt chương trình, sao lưu, thay các tệp chương trình, giữ `data/`, `voices/`, `config.local.json`. Chạy lại bộ cài nếu đổi thư viện. Không chép `.venv` sang máy/đường dẫn khác; tạo lại bằng bộ cài.
+- Các tệp media có thể dùng nhiều dung lượng. Bản này chưa có tự dọn tác vụ trên đĩa; bạn tự quản lý thư mục data sau khi đã tải/sao lưu kết quả cần giữ.
+
+Máy chủ chỉ bind `127.0.0.1`, không tự mở firewall hoặc phát ra Internet. Không nhập khóa vào bản web online. Bản online dùng để xem giao diện và dựng nháp; bản laptop cung cấp Python/FFmpeg/lịch thật.</pre></section><section><h2>Phạm vi đã kiểm tra</h2><pre>Đã kiểm thử trên môi trường Linux: MP4 timeline thật (crossfade, tốc độ, lớp chèn, chữ Việt, audio), cắt im lặng, HTML → MP4/SRT, nhập video tư liệu, giới hạn AI, bỏ duyệt sau chỉnh sửa, chống lặp chiến dịch và trạng thái lịch/biên nhận dịch vụ. Bộ cài BAT được chuẩn bị cho Windows nhưng chưa thực thi trên laptop của bạn. Chưa kiểm chứng tải link Douyin/RedNote thật, Whisper trên máy của bạn, gọi AI tính phí hoặc đăng mạng xã hội bằng tài khoản thật.
+
+Nguồn: FFmpeg https://ffmpeg.org/ffmpeg-filters.html ; yt-dlp https://github.com/yt-dlp/yt-dlp ; faster-whisper https://github.com/SYSTRAN/faster-whisper ; Gemini https://ai.google.dev/api/generate-content .</pre></section><section><h2>HyperFrames Studio — bổ sung 29/10/2026</h2><pre>Bản này tích hợp HyperFrames **0.8.214** và GSAP **3.15.0** qua Node.js. Đây là bộ dựng thật gọi CLI HyperFrames, không chỉ là giao diện mô phỏng.
+
+### Cài trên laptop Windows
+
+1. Cài bộ cơ bản bằng `CAI_DAT_WINDOWS.bat` nếu chưa cài. Máy cần FFmpeg và ffprobe.
+2. Chạy **CAI_DAT_HYPERFRAMES.bat**. Nếu thiếu Node.js, cài Node.js LTS phiên bản 22 trở lên từ trang chính thức https://nodejs.org/en/download , rồi mở lại cửa sổ BAT. Ví dụ lệnh Windows Package Manager: `winget install --id OpenJS.NodeJS.LTS -e --source winget`.
+3. Bộ cài đặt runtime riêng trong `.hyperframes/`, không cài npm package toàn cục. Nó kiểm tra Chromium; ưu tiên dùng trình duyệt Playwright đã cài cho Remix Studio, nếu cần HyperFrames sẽ tải browser của nó. Lần cài đầu cần Internet.
+4. Chạy lại `KHOI_DONG.bat`, mở **HyperFrames Studio**. Bấm Kiểm tra bộ dựng; Node, FFmpeg và runtime cần báo sẵn sàng.
+
+Bản online chỉ xem bố cục, lưu bản nháp và xem MP4 mẫu đã render. Xuất video thật chạy bằng bản laptop. Không cần đăng ký HeyGen hoặc mua gói AI để render các mẫu do bạn nhập nội dung; AI viết nội dung ở quy trình riêng vẫn cần key/hạn mức Gemini.
+
+### Dùng ba mẫu đã tích hợp
+
+- **Giới thiệu sản phẩm:** tên thương hiệu, tiêu đề, mô tả, các điểm nổi bật, lời kêu gọi và ảnh JPG/PNG/WebP tối đa 3 MB.
+- **Chữ chuyển động:** mỗi dòng là một thông điệp, chạy lần lượt theo thời lượng video.
+- **Biểu đồ số liệu:** mỗi dòng theo dạng `Nhãn | giá trị`, tối đa 8 cột, tỷ lệ thanh tính theo giá trị lớn nhất. Dữ liệu mẫu là minh họa, phải thay bằng số liệu của bạn.
+
+Chọn tỷ lệ 9:16 / 16:9 / 1:1, cạnh ngắn 360 / 540 / 720 / 1080p, 24 hoặc 30 FPS, thời lượng 2–120 giây. Mặc định 540p, 24 FPS, chế độ `draft` và một worker cùng `--low-memory-mode` để ưu tiên laptop CPU. Preview là bố cục tĩnh, không phải playback chính xác của GSAP; xem MP4 đã xuất để kiểm tra chuyển động. Bấm **Lưu &amp; cập nhật xem trước** sau khi thay nội dung.
+
+Bấm **Render MP4** để xếp hàng. Sau khi hoàn tất có thể:
+
+- Xem và tải MP4; tải SRT đi kèm. Ở mẫu không có lời đọc, SRT là phần chữ mô tả, không phải nhận dạng tiếng nói hay phụ đề chạy chữ đã chèn sẵn.
+- Tải **mã dự án ZIP** gồm HTML, GSAP local, thông tin giấy phép và audio nếu có. Giải nén vào thư mục riêng, render lại bằng `npx hyperframes@0.8.214 render --workers 1 --low-memory-mode --output video.mp4` khi đã có Node/FFmpeg. HTML dự án không phải một tệp độc lập; giữ thư mục `assets/` và các tệp voice.
+- **Mở trong timeline:** MP4 được nhập thành một clip để cắt, chèn chữ, phối nhạc hoặc thêm lớp khác. Không chuyển ngược animation HTML thành từng clip timeline.
+- **Đưa vào duyệt / lịch:** video trở thành công việc mới chờ duyệt; không tự kế thừa duyệt hay tự đăng.
+- **Thêm vào kho:** sao chép MP4 vào IndexedDB của trình duyệt hiện tại.
+
+### Kết nối quy trình AI
+
+Trong **Ý tưởng &amp; lịch tự động**, chọn bộ dựng **HyperFrames · chữ và chuyển động**. Có thể nhập lời thoại sẵn, lưu nháp rồi dựng; hoặc dùng AI viết &amp; dựng khi đã cấu hình Gemini. Kịch bản được chuyển thành từng cảnh HTML có mốc thời gian, chuyển động GSAP, lời đọc Piper/Edge tùy lựa chọn và SRT. Thời lượng mỗi cảnh sẽ kéo dài nếu giọng đọc cần thêm thời gian. Tổng thời lượng sau lời đọc tối đa 5 phút. Với bản tích hợp này, lời thoại nằm trong audio và SRT; chèn phụ đề hiển thị thêm qua timeline nếu cần.
+
+Các chiến dịch hằng ngày cũng dùng được bộ dựng HyperFrames. Video vẫn cần duyệt trước khi lên lịch đăng. Đóng tab vẫn tiếp tục xử lý khi cửa sổ máy chủ còn mở; laptop ngủ hoặc tắt máy sẽ dừng. Sau khởi động lại, tác vụ đang chạy được đánh dấu gián đoạn, không tự dựng lại.
+
+### Phạm vi và giới hạn
+
+- Giao diện hiện tích hợp **3 mẫu do Remix Studio viết**, không phải toàn bộ khoảng 450 block trong catalog HyperFrames. Có thể dùng CLI HyperFrames riêng để tạo dự án khác. Bản web này chưa nhận và thực thi HTML/JavaScript bất kỳ tải lên.
+- HyperFrames dùng Apache-2.0. GSAP giữ giấy phép riêng tại https://gsap.com/standard-license/ ; thông tin được giữ trong dự án ZIP. ZIP cài Remix Studio không chứa toàn bộ HyperFrames, node_modules, model hoặc khóa riêng; bộ cài tải dependency từ npm.
+- Render local có thể khác font/phiên bản Chromium giữa các máy. Chế độ Docker kiểm soát môi trường của HyperFrames chưa được đưa vào UI này. Không cam kết đầu ra giống byte hoặc pixel trên mọi máy.
+- Không tự tạo avatar, clone giọng hoặc đăng TikTok. Những chức năng đó là dịch vụ/tính năng riêng.
+- Có thể đặt `REMIX_HYPERFRAMES_ROOT` để chỉ runtime đã cài ở nơi khác; `REMIX_HYPERFRAMES_BROWSER` để chỉ Chrome/Chromium executable. Mặc định không cần sửa. Runtime nằm trên laptop, không đặt đường dẫn này vào giao diện online.
+- Khi lỗi, mở **Nhật ký CLI** ngay tại tác vụ. Không đưa API key của ứng dụng vào môi trường child process HyperFrames; renderer được đặt `DO_NOT_TRACK=1`.
+
+Nguồn chính thức: https://github.com/heygen-com/hyperframes ; https://hyperframes.heygen.com/guides/rendering .</pre></section></html>

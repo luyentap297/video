@@ -1,0 +1,67 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hướng dẫn tự động tạo video</title><style>body{font:16px/1.7 system-ui;max-width:900px;margin:40px auto;padding:0 22px;color:#1b3158;background:#f5f8fc}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:25px;border-radius:16px}a{color:#2461b0}</style><a href="index.html#automation">← Remix Studio</a><h1>Hướng dẫn tự động tạo video</h1><pre># Tự động tạo video trong Remix Studio
+
+## Những gì dùng được
+
+- **Lời thoại → phân cảnh:** chạy ngay trên web, không cần khóa. Chia đoạn, tạo nền SVG và chữ rồi mở trong trình dựng. Đây là dựng theo mẫu, không phải AI tự viết. Thêm giọng đọc / nhạc trong trình dựng. Có thể tải HTML hoặc chuyển sang bộ render HTML có Piper / Edge TTS.
+- **Cắt khoảng lặng:** bản cài cục bộ dùng FFmpeg để phân tích và xuất MP4 H.264/AAC. Có tùy chọn Auto-Editor nếu đã cài executable `auto-editor` vào PATH. Không tự tải hoặc cài phần mềm thứ ba.
+- **MoneyPrinterTurbo:** bộ nối POST tạo video, GET trạng thái, tải kết quả và đưa vào kho. Cần dịch vụ riêng đã cấu hình LLM, tư liệu, TTS và phụ đề; chưa chạy tạo video thật với tài khoản của bạn.
+- **Runway:** bộ nối ảnh → video 5 giây `gen4_turbo`, theo dõi tác vụ, yêu cầu hủy và tải MP4. Cần API key và credit; chưa chạy tạo video tính phí thật.
+
+Web đang lưu trữ tĩnh nên không chạy FFmpeg/Python và không giữ API key. Dùng bản cài trên máy để chạy các bộ nối. Không gọi localhost từ trang online: mở giao diện do `start_windows.bat` khởi động.
+
+## Cài trên Windows
+
+1. Giải nén `remix-studio-source.zip`.
+2. Cài Python 3.11+ và FFmpeg có `ffmpeg`, `ffprobe` trong PATH.
+3. Chạy `install_windows_render.bat`, sau đó `start_windows.bat`.
+4. Mở **Tự động tạo video**. Cắt khoảng lặng hoạt động khi phát hiện FFmpeg/ffprobe.
+
+Video đầu vào tối đa 50 MB, 10 phút, 4K; đầu ra tối đa 250 MB từ dịch vụ. FFmpeg đo im lặng ít nhất 0,4 giây; ngưỡng mặc định -35 dB và đệm 0,15 giây. Kiểm tra âm đầu/cuối sau cắt; nhạc nền có thể khiến khoảng lặng không bị phát hiện. Không có audio hoặc hoàn toàn im lặng sẽ báo rõ lỗi. Bản gốc vẫn giữ trong thư mục tác vụ.
+
+## MoneyPrinterTurbo
+
+Nguồn chính thức: https://github.com/harry0703/MoneyPrinterTurbo (MIT). Cài riêng theo README chính thức, ưu tiên Docker Compose chính thức. Không chạy trên cùng cổng 8080 của Remix Studio; ví dụ ánh xạ API sang cổng 8081. Thiết lập LLM, Pexels và giọng tiếng Việt trong MoneyPrinterTurbo trước. Tính năng này tạo một video mỗi tác vụ, mặc định nguồn Pexels, phụ đề bật và 2 luồng xử lý.
+
+Trong cửa sổ PowerShell, tại thư mục Remix Studio:
+
+```powershell
+$env:REMIX_MPT_URL = &quot;http://127.0.0.1:8081&quot;
+# Chỉ đặt dòng dưới nếu MoneyPrinterTurbo đã bật api_key:
+$env:REMIX_MPT_TOKEN = &quot;YOUR_MPT_API_TOKEN&quot;
+# Tùy chọn giọng theo danh sách MoneyPrinterTurbo hỗ trợ:
+$env:REMIX_MPT_VOICE = &quot;vi-VN-HoaiMyNeural-Female&quot;
+.\start_windows.bat
+```
+
+Bấm **Kiểm tra kết nối**. Nếu truy cập được nhưng tạo lỗi, kiểm tra key LLM/Pexels, font tiếng Việt, FFmpeg, TTS và mô hình phụ đề ở phía MoneyPrinterTurbo. Bộ nối không đồng nghĩa các khóa đó đã được cấp. Chủ đề gửi tới các nhà cung cấp đã cấu hình; chúng có thể tính phí. Không mặc định giọng đọc là miền Nam.
+
+Đầu ra được nhận từ `/api/v1/tasks/{task_id}` và chỉ tải đường dẫn `/tasks/...` trên cùng dịch vụ loopback đã cấu hình. Không cho biểu mẫu chỉ định máy chủ khác. Dừng theo dõi trong Remix Studio không hủy được tác vụ MoneyPrinterTurbo đang chạy; giữ mã dịch vụ để kiểm tra trên dịch vụ.
+
+## Runway
+
+Tạo API key trong tài khoản nhà cung cấp và nạp credit theo hướng dẫn https://docs.dev.runwayml.com/ . Đặt biến ở máy chủ, không nhập key vào trình duyệt và không gửi key trong chat:
+
+```powershell
+$env:RUNWAYML_API_SECRET = &quot;YOUR_RUNWAY_API_KEY&quot;
+.\start_windows.bat
+```
+
+Chọn ảnh JPG/PNG/WebP tối đa 3 MB, mô tả tối đa 1000 ký tự, tỷ lệ dọc/ngang. Đánh dấu đồng ý dùng credit, bấm tạo. Mã gọi `POST /v1/image_to_video`, model `gen4_turbo`, 5 giây, API version `2024-11-06`; theo dõi `GET /v1/tasks/{id}`, hủy qua DELETE nếu đã nhận mã. Ảnh và mô tả gửi tới Runway. URL kết quả HTTPS được tải về máy ngay khi hoàn tất. Nên dùng ảnh đúng tỷ lệ xuất; model có thể cắt ảnh.
+
+Không tự gửi lại yêu cầu khi lỗi hoặc hết thời gian. Nếu POST đã tới nhà cung cấp nhưng kết nối bị ngắt trước khi nhận mã, tác vụ vẫn có thể phát sinh phí. Kiểm tra bảng điều khiển nhà cung cấp trước khi tạo lại.
+
+## Auto-Editor tùy chọn
+
+Nguồn chính thức: https://github.com/WyattBlue/auto-editor ; tài liệu CLI https://auto-editor.com/ref/options . Cài bản phù hợp hệ điều hành theo tài liệu chính thức rồi xác nhận `auto-editor --version` chạy được trong terminal. Khởi động lại Remix Studio để cập nhật PATH. Bộ nối gọi lệnh trực tiếp, không qua shell, dùng `--edit audio:threshold=...`, `--margin`, `--no-open`, libx264 và AAC. Ngưỡng dB được quy đổi sang biên độ; kết quả có thể khác FFmpeg vì thuật toán đo khác nhau. Chưa kiểm chứng executable Auto-Editor trong môi trường này; FFmpeg đã được kiểm thử xuất thật.
+
+## Lưu trữ và phục hồi
+
+- Tác vụ lưu trong `data/automation/jobs/&lt;id&gt;/`, JSON trạng thái, input, MP4 và log cắt. API key không được ghi vào tác vụ, ZIP nguồn hoặc IndexedDB. Ảnh Runway dùng tạm, xóa khi tác vụ kết thúc; mô tả còn trong JSON tác vụ.
+- Mở lại tab có thể xem hàng đợi. Giữ máy chủ chạy. Sau khởi động lại, tác vụ chưa xong được đánh dấu gián đoạn, không tự gửi lại tác vụ có thể tính phí. Mã dịch vụ đã nhận được giữ lại.
+- Bấm **Thêm vào kho video** để sao chép kết quả vào kho trình duyệt. Sao lưu kho bằng tính năng hiện có. Dữ liệu tác vụ trên đĩa cần sao lưu riêng; ZIP nguồn không chứa `data/` hoặc khóa.
+- Máy chủ chỉ bind `127.0.0.1`, kiểm tra Host và Origin; không phải máy chủ đa người dùng hay dịch vụ public. Không mở cổng ra Internet.
+
+## Kiểm thử
+
+Chạy `.venv\Scripts\python -m unittest discover -s tests -v` trên Windows, hoặc `.venv/bin/python -m unittest discover -s tests -v` trên Linux. Kiểm thử cắt dùng MP4 tổng hợp có tiếng và khoảng im lặng, xác minh độ dài đầu ra và audio/video. Kiểm thử bộ nối dùng dịch vụ giả lập để kiểm chứng cấu trúc API; không chứng minh tài khoản bên ngoài hoạt động.
+</pre></html>
